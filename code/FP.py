@@ -142,13 +142,12 @@ class FourierPtychography:
                               torch.arange(-r + 0.5, r, step=torch.tensor(1)), indexing='ij')
 
         if self.aperture_shape=='rect':
-            pupil = torch.sigmoid(r**2 - x**2)*torch.sigmoid(r**2 - y**2)
-            # pupil = rect1d(x / (2 * r)) * rect1d(y / (2 * r))
+            pupil = rect1d(x / (2 * r)) * rect1d(y / (2 * r))
 
         elif self.aperture_shape=='circ':
-            # circ = ((x ** 2 + y ** 2) < r ** 2).type(torch.float32)
-            # idx = ((x ** 2 + y ** 2) == r ** 2)
-            # circ[idx] = 0.5
+            circ = ((x ** 2 + y ** 2) < r ** 2).type(torch.float32)
+            idx = ((x ** 2 + y ** 2) == r ** 2)
+            circ[idx] = 0.5
 
             pupil = torch.sigmoid(r ** 2 - (x ** 2 + y ** 2))
             
@@ -248,7 +247,6 @@ class FourierPtychography:
         if self.is_energy_constraint == True:
             # x_ft = x_ft / torch.sqrt(self.pattern)
             x_ft[~self.pattern_mask] = x_ft[~self.pattern_mask] / torch.sqrt(self.pattern[~self.pattern_mask])
-            x_ft[self.pattern_mask] = 0.0
 
                 
         if self.ft_pad > 0:
@@ -280,9 +278,8 @@ class FourierPtychography:
         x_ft = F.pad(x_ft, (self.padding,) *4)
         
         if self.is_energy_constraint == True:
-            # x_ft = x_ft / torch.sqrt(self.pattern)
             x_ft[~self.pattern_mask] = x_ft[~self.pattern_mask] / torch.sqrt(self.pattern[~self.pattern_mask])
-            x_ft[self.pattern_mask] = 0.0
+
             
         if self.ft_pad > 0:
             measure_size = self.N_lr + 2*self.ft_pad_size
@@ -331,9 +328,8 @@ class FourierPtychography:
             x_est_ft = FT(x_est)/self.N_hr            
             x_est_ft = F.pad(x_est_ft, (self.padding,) * 4)            
             if self.is_energy_constraint == True:
-                # x_est_ft = x_est_ft/ torch.sqrt(self.pattern)
                 x_est_ft[~self.pattern_mask] = x_est_ft[~self.pattern_mask] / torch.sqrt(self.pattern[~self.pattern_mask])
-                x_est_ft[self.pattern_mask] = 0.0
+
             
             order = list(range(self.meas_num))
             random.shuffle(order)
@@ -496,10 +492,10 @@ def group_test_exclude(try_num=5, N_hr=256, N_lr=128, overlapping_ratio=0.5625, 
         x_est = fp.fp_gs_gd(max_it_gs=max_it_gs, max_it_gd=max_it_gd)
         
         mse_ang.append(minAngMSE(fp.x_band, x_est))
-        mse_amp.append(minAmpMSE(fp.x_band, x_est))
-        mse_cpx.append(minCpxMSE(fp.x_band, x_est))
-        psnr_ang.append(PSNR(fp.x_band.angle().cpu().numpy(), x_est.angle().cpu().numpy()))
-        psnr_amp.append(PSNR(fp.x_band.abs().cpu().numpy(), x_est.abs().cpu().numpy()))        
+        # mse_amp.append(minAmpMSE(fp.x_band, x_est))
+        # mse_cpx.append(minCpxMSE(fp.x_band, x_est))
+        # psnr_ang.append(PSNR(fp.x_band.angle().cpu().numpy(), x_est.angle().cpu().numpy()))
+        # psnr_amp.append(PSNR(fp.x_band.abs().cpu().numpy(), x_est.abs().cpu().numpy()))        
         
         print(f'Test {idx+1}, cpx mse is {minCpxMSE(fp.x_band, x_est)}, angle mse is {minAngMSE(fp.x_band, x_est)}, amp mse is {minAmpMSE(fp.x_band, x_est)}')
         
