@@ -1,6 +1,6 @@
 # Ptychographic Wavefront Cameras
 
-This is the open source code for the paper of "Ptychographic Wavefront Cameras".
+This is the open source code for the paper of "[Ptychographic Wavefront Cameras](https://doi.org/10.1364/OL.542871)," Optics Letters 49 (23) : 6653-6656, 2024.
 
 [Ni Chen](https://ni-chen.github.io) and [David J. Brady](https://scholar.google.com/citations?hl=en&authuser=1&user=CcSZwTsAAAAJ)
 
